@@ -1,0 +1,1 @@
+../misc/install_all_powa_ext.sql

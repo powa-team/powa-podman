@@ -1,0 +1,52 @@
+version: "2"
+
+services:
+  powa-repository:
+    image: powateam/powa-archivist-git
+    container_name: powa-git-repository
+    environment:
+      POWA_EXTRA_SQL: >
+        SELECT powa_register_server(hostname => 'powa-git-remote-primary',
+          alias => 'primary',
+          username => 'postgres',
+          frequency => 15,
+          extensions => '{pg_stat_kcache,pg_qualstats,pg_wait_sampling,pg_track_settings}');
+        SELECT powa_register_server(hostname => 'powa-git-remote-standby',
+          alias => 'standby',
+          username => 'postgres',
+          frequency => 15,
+          extensions => '{pg_stat_kcache,pg_qualstats,pg_wait_sampling,pg_track_settings}');
+
+  powa-collector:
+    image: powateam/powa-collector-git
+    container_name: powa-git-collector
+    restart: on-failure
+    links:
+      - powa-repository
+      - remote-primary
+      - remote-standby
+
+  powa-web-git:
+    image: powateam/powa-web-git
+    container_name: powa-git-web
+    ports:
+      - 8888:8888
+    links:
+      - powa-repository
+      - remote-primary
+      - remote-standby
+
+  remote-primary:
+    image: powateam/powa-archivist-git
+    container_name: powa-git-remote-primary
+    environment:
+      POWA_ROLE: 'PRIMARY'
+      POWA_LOCAL_SNAPSHOT: 'NO'
+
+  remote-standby:
+    image: powateam/powa-archivist-git
+    container_name: powa-git-remote-standby
+    environment:
+      POWA_ROLE: 'STANDBY'
+      POWA_PRIMARY: 'remote-primary'
+      POWA_LOCAL_SNAPSHOT: 'NO'
