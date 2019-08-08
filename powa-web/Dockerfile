@@ -10,6 +10,8 @@ RUN apt-get update && apt-get install -y \
     python \
     python-dev \
     python-pip \
+    # current released version is not compatible with SQLAlchemy >= 3.0.0
+    && pip install "sqlalchemy<1.3.0" \
     && pip install powa-web \
     && apt-get purge -y --auto-remove libpq-dev python-dev python-pip \
     && rm -rf /var/lib/apt/lists/*
