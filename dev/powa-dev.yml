@@ -1,0 +1,81 @@
+version: "2"
+
+services:
+  powa-repository:
+    image: powateam/powa-archivist-git
+    container_name: powa-dev-repository
+    environment:
+      POWA_EXTRA_SQL: >
+        SELECT powa_register_server(hostname => 'powa-dev-remote-primary',
+          alias => 'primary',
+          username => 'postgres',
+          frequency => 15,
+          extensions => '{pg_stat_kcache,pg_qualstats,pg_wait_sampling,pg_track_settings}');
+        SELECT powa_register_server(hostname => 'powa-dev-remote-standby',
+          alias => 'standby',
+          username => 'postgres',
+          frequency => 15,
+          extensions => '{pg_stat_kcache,pg_qualstats,pg_wait_sampling,pg_track_settings}');
+
+  powa-collector:
+    image: powateam/powa-collector-dev
+    container_name: powa-dev-collector
+    restart: on-failure
+    command: "powa-collector-dev/powa-collector.py"
+    volumes:
+      - '${POWA_COLLECTOR_GIT}:/usr/local/src/powa-collector-dev'
+    links:
+      - powa-repository
+      - remote-primary
+      - remote-standby
+
+  powa-web-dev:
+    image: powateam/powa-web-dev
+    container_name: powa-dev-web
+    command: "powa-web-dev/run_powa.py"
+    ports:
+      - 8888:8888
+    volumes:
+      - '${POWA_WEB_GIT}:/usr/local/src/powa-web-dev'
+    links:
+      - powa-repository
+      - remote-primary
+      - remote-standby
+
+  remote-primary:
+    image: powateam/powa-archivist-git
+    container_name: powa-dev-remote-primary
+    environment:
+      POWA_ROLE: 'PRIMARY'
+      POWA_LOCAL_SNAPSHOT: 'NO'
+
+  remote-standby:
+    image: powateam/powa-archivist-git
+    container_name: powa-dev-remote-standby
+    environment:
+      POWA_ROLE: 'STANDBY'
+      POWA_PRIMARY: 'remote-primary'
+      POWA_LOCAL_SNAPSHOT: 'NO'
+
+  pgbench-std-primary:
+    image: powateam/powa-pgbench
+    container_name: powa-dev-pgbench-std-primary
+    restart: on-failure
+    environment:
+      PGHOST: 'remote-primary'
+      PGUSER: 'postgres'
+      BENCH_SCALE_FACTOR: 10
+      BENCH_TIME: 60
+      BENCH_FLAG: '-c1 -j1 -n -R 50'
+
+  pgbench-std-standby:
+    image: powateam/powa-pgbench
+    container_name: powa-dev-pgbench-std-standby
+    restart: on-failure
+    environment:
+      PGHOST: 'remote-standby'
+      PGUSER: 'postgres'
+      BENCH_SKIP_INIT: 'true'
+      BENCH_SCALE_FACTOR: 10
+      BENCH_TIME: 120
+      BENCH_FLAG: '-c2 -j2 -S -n'
