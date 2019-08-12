@@ -44,11 +44,11 @@ powa-archivist, with the following setup:
 
 - a powa-web-dev configured with a bind mount of your local powa-web git
   repository that you're working on.  The location of the repository must be
-  setup in the environment variable $POWA_WEB_REPOSITORY.
+  setup in the environment variable $POWA_WEB_GIT.
 
 - a powa-collector-dev configured with a bind mount of you local powa-collector
   git repository that you're working on.  The location of the repository must
-  be setup in the environment variable $POWA_COLLECTOR_REPOSITORY.
+  be setup in the environment variable $POWA_COLLECTOR_GIT.
 
 - two powa-pgbench images, that will run pgbench workload on the primary and
   standby instances.
