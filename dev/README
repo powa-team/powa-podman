@@ -55,3 +55,7 @@ powa-archivist, with the following setup:
 
 Simply launching this docker-compose setup should be enough to test most
 features in PoWA.
+
+POWA_WEB_GIT=/path/to/powa-web POWA_COLLECTOR_GIT=/path/to/powa-collector docker-compose -f powa-dev.yml up
+
+Load http://0.0.0.0:8888 in your browser.
