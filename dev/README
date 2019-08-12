@@ -6,7 +6,7 @@ on either powa-web, the User Interface of the PoWA project, or powa-collector,
 the dedicated daemon to perform remote snapshots, without locally setting up
 the full environment needed to test PoWA.
 
-Here is the list of available images with their specifities:
+Here is the list of available images with their specificities:
 
 - powa-pyutils: shell image with required python dependencies to run either
   powa-collector or powa-web
@@ -14,7 +14,6 @@ Here is the list of available images with their specifities:
 - powa-collector-dev: simple image based on powa-pyutils that ships a specific
   powa-web.conf file.  This should be used with a bind mount of your local
   powa-web repository with the changes you want to use.
-  file.
 
 - powa-web-dev: simple image based on powa-pyutils that ships a specific
   powa-collector.conf file.  This should be used with a bind mount of your local
@@ -24,8 +23,7 @@ Here is the list of available images with their specifities:
 
 - powa-pgbench: image based on powa-pgbin that can initialize a pgbench
   database and run configurable tests in a loop until the container is stopped.
-  The following environment variable can
-  be used:
+  The following environment variables can be used:
   - BENCH_DB: database name to use.  Default is pgbench.
   - BENCH_SKIP_INIT: if empty, a pgbench database will be initialized on the
     target server (pgbench -i)
@@ -44,16 +42,20 @@ powa-archivist, with the following setup:
 
 - two powa-archivist-git images in streaming replication
 
-- a powa-web-dev configured with a bind mount of you local powa-web git
+- a powa-web-dev configured with a bind mount of your local powa-web git
   repository that you're working on.  The location of the repository must be
-  setup in the environment variable $POWA_WEB_REPOSITORY.
+  setup in the environment variable $POWA_WEB_GIT.
 
 - a powa-collector-dev configured with a bind mount of you local powa-collector
   git repository that you're working on.  The location of the repository must
-  be setup in the environment variable $POWA_COLLECTOR_REPOSITORY.
+  be setup in the environment variable $POWA_COLLECTOR_GIT.
 
 - two powa-pgbench images, that will run pgbench workload on the primary and
   standby instances.
 
 Simply launching this docker-compose setup should be enough to test most
 features in PoWA.
+
+POWA_WEB_GIT=/path/to/powa-web POWA_COLLECTOR_GIT=/path/to/powa-collector docker-compose -f powa-dev.yml up
+
+Load http://0.0.0.0:8888 in your browser.
