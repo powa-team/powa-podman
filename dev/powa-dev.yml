@@ -66,7 +66,7 @@ services:
       PGUSER: 'postgres'
       BENCH_SCALE_FACTOR: 10
       BENCH_TIME: 60
-      BENCH_FLAG: '-c1 -j1 -n -R 50'
+      BENCH_FLAG: '-c1 -j1 -n -R 10'
 
   pgbench-std-standby:
     image: powateam/powa-pgbench
@@ -78,4 +78,4 @@ services:
       BENCH_SKIP_INIT: 'true'
       BENCH_SCALE_FACTOR: 10
       BENCH_TIME: 120
-      BENCH_FLAG: '-c2 -j2 -S -n'
+      BENCH_FLAG: '-c2 -j2 -S -n -R 10'
