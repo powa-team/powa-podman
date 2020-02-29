@@ -2,7 +2,7 @@ version: "2"
 
 services:
   powa-repository:
-    image: powateam/powa-archivist-12
+    image: powateam/powa-archivist-11
     container_name: powa-standalone-repository
 
   powa-web:
