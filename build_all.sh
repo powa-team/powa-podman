@@ -7,7 +7,8 @@ function usage {
     echo ""
     echo " -h                   Show this message"
     echo " -i image             Only build a specific image. Suported values are"
-    echo "                      powa-archivist, powa-web, powa-collector"
+    echo "                      powa-archivist(-git), powa-web(-git) and"
+    echo "                      powa-collector(-git)"
     echo " -n                   Don't clean the images"
     echo " -p                   push the image after building"
     echo " -s subversion        Only build a specific subversion for a specific"
@@ -18,7 +19,7 @@ function usage {
 
 DIRNAME="$(dirname $0)"
 
-specific_image=
+specific_image=""
 specific_subver=
 noclean="false"
 github_user=
@@ -31,13 +32,18 @@ while getopts "hi:nps:u:" name; do
             exit 0
             ;;
         i)
-            if [[ "$OPTARG" != "powa-archivist" && "$OPTARG" != "powa-web" && "$OPTARG" != "powa-collector" ]]; then
+            if [[ "$OPTARG" != "powa-archivist" \
+                && "$OPTARG" != "powa-archivist-git" \
+                && "$OPTARG" != "powa-web-git" \
+                && "$OPTARG" != "powa-web" \
+                && "$OPTARG" != "powa-collector" \
+                && "$OPTARG" != "powa-collector-git" ]]; then
                 echo "Image is not supported: ${OPTARG}"
                 usage
                 exit 1
             fi
 
-            specific_image="${OPTARG}"
+            specific_image="${specific_image} ${OPTARG}"
             ;;
         n)
             noclean="true"
@@ -72,6 +78,29 @@ if [[ -n "${specific_subver}" && "${specific_image}" != "powa-archivist" ]]; the
     exit 1
 fi
 
+function should_be_built {
+    local target="$1"
+
+    if [[ -z "${target}" ]]; then
+        echo "No target specified"
+        exit 2
+    fi
+
+    # Build all if no image was specified
+    if [[ -z "${specific_image}" ]]; then
+        return 0
+    fi
+
+    # Is the target part of the specified images?  Extra safety is needed here
+    # as different targets have a common prefix (eg. powa-web and powa-web-git)
+    re="$target( |$)"
+    if [[ "${specific_image}" =~ $re ]]; then
+        return 0
+    fi
+
+    return 1
+}
+
 echo "######################"
 echo "#                    #"
 echo "#  Build script for  #"
@@ -84,15 +113,15 @@ ORG="powateam"
 # get a X.Y.Z information from the latest release name, which should be
 # "version X.Y.Z". The release name can be easily edited, so this should be
 # more reliable than using the release tags.
-if [[ -z ${specific_image} || "${specific_image}" == "powa-archivist" ]]; then
+if should_be_built  "powa-archivist"; then
     VER_ARCHIVIST="$(curl ${github_user} https://api.github.com/repos/powa-team/powa-archivist/releases/latest | jq -r '.name' | sed 's/version //i')"
 fi
 
-if [[ -z ${specific_image} || "${specific_image}" == "powa-web" ]]; then
+if should_be_built "powa-web"; then
     VER_WEB="$(curl ${github_user} https://api.github.com/repos/powa-team/powa-web/releases/latest | jq -r '.name' | sed 's/version //i')"
 fi
 
-if [[ -z ${specific_image} || "${specific_image}" == "powa-collector" ]]; then
+if should_be_built "powa-collector"; then
     VER_COLLECTOR="$(curl ${github_user} https://api.github.com/repos/powa-team/powa-collector/releases/latest | jq -r '.name' | sed 's/version //i')"
 fi
 
@@ -145,30 +174,40 @@ function build_image {
     echo "Pulling ${base_image}..."
     docker pull "${base_image}"
 
-    echo "Building ${ORG}/${img_name}:${img_version}..."
-    docker build -q ${cache_flag} -t ${ORG}/${img_name}:${img_version} ${img_dir}
-    echo "Updating ${ORG}/${img_name}:latest..."
-    docker build -q -t ${ORG}/${img_name}:latest ${img_dir}
-    if [[ "${docker_push}" == "true" ]]; then
-        echo "Pushing ${ORG}/${img_name}:${img_version}..."
-        docker push "${ORG}/${img_name}:${img_version}"
-        echo "Pushing ${ORG}/${img_name}:latest..."
-        docker push "${ORG}/${img_name}:latest"
-    fi
+    for tag in "${img_version}" "latest"; do
+        if [[ "${tag}" == "-" ]]; then
+            continue
+        fi
+        echo "Building ${ORG}/${img_name}:${tag}..."
+        docker build -q ${cache_flag} -t ${ORG}/${img_name}:${tag} ${img_dir}
+        if [[ "${docker_push}" == "true" ]]; then
+            echo "Pushing ${ORG}/${img_name}:${tag}..."
+            docker push "${ORG}/${img_name}:${tag}"
+        fi
+    done
 }
 
 echo ""
 echo "==================================="
 echo "Minor versions to be built:"
 echo ""
-if [[ -z ${specific_image} || "${specific_image}" == "powa-archivist" ]]; then
+if should_be_built "powa-archivist"; then
     echo "${ORG}/powa-archivist: ${VER_ARCHIVIST}"
 fi
-if [[ -z ${specific_image} || "${specific_image}" == "powa-web" ]]; then
+if should_be_built "powa-archivist-git"; then
+    echo "${ORG}/powa-archivist-git"
+fi
+if should_be_built "powa-web"; then
     echo "${ORG}/powa-web:       ${VER_WEB}"
 fi
-if [[ -z ${specific_image} || "${specific_image}" == "powa-collector" ]]; then
+if should_be_built "powa-web-git"; then
+    echo "${ORG}/powa-web-git"
+fi
+if should_be_built "powa-collector"; then
     echo "${ORG}/powa-collector: ${VER_COLLECTOR}"
+fi
+if should_be_built "powa-collector-git"; then
+    echo "${ORG}/powa-collector-git"
 fi
 if [[ -n "${specific_subver}" ]]; then
     echo "  Subversion: ${specific_subver}"
@@ -187,7 +226,7 @@ if [ "$cont" != "y" -a "$cont" != "Y" ]; then
     exit 1
 fi
 
-if [[ -z ${specific_image} || "${specific_image}" == "powa-archivist" ]]; then
+if should_be_built "powa-archivist"; then
     echo "############################"
     echo "##                         #"
     echo "##     powa-archivist      #"
@@ -216,18 +255,22 @@ if [[ -z ${specific_image} || "${specific_image}" == "powa-archivist" ]]; then
         IMGNAME="powa-archivist-${PG_VER}"
 
         build_image "${IMGNAME}" "${VER_ARCHIVIST}" "${CURDIR}"
-
-        # rmi "${IMGNAME}:latest"
-        # rmi "${IMGNAME}:${VER_ARCHIVIST}"
-
-        # echo "Building powa-archivist tag ${VER_ARCHIVIST}..."
-        # docker build -q --no-cache -t ${IMGNAME}:${VER_ARCHIVIST} ${CURDIR}
-        # echo "Updating powa-archivist:latest..."
-        # docker build -q -t ${IMGNAME}:latest ${CURDIR}
     done
 fi
 
-if [[ -z ${specific_image} || "${specific_image}" == "powa-web" ]]; then
+if should_be_built "powa-archivist-git"; then
+    echo "############################"
+    echo "##                         #"
+    echo "##    powa-archivist-git   #"
+    echo "##                         #"
+    echo "############################"
+    echo ""
+    BASEDIR="${DIRNAME}/powa-archivist-git"
+
+    build_image "powa-archivist-git" "-" "${BASEDIR}"
+fi
+
+if should_be_built "powa-web"; then
     echo ""
     echo "############################"
     echo "##                         #"
@@ -235,22 +278,27 @@ if [[ -z ${specific_image} || "${specific_image}" == "powa-web" ]]; then
     echo "##                         #"
     echo "############################"
     echo ""
-    # echo "Removing old images..."
 
     BASEDIR="${DIRNAME}/powa-web"
 
     build_image "powa-web" "${VER_WEB}" "${BASEDIR}"
-
-    # rmi "${ORG}/powa-web:latest"
-    # rmi "${ORG}/powa-web:${VER_WEB}"
-    #
-    # echo "Building powa-web tag ${VER_WEB}..."
-    # docker build -q --no-cache -t ${NAME_WEB}:${VER_WEB} ${BASEDIR}
-    # echo "Updating powa-web:latest..."
-    # docker build -q -t ${NAME_WEB}:latest ${BASEDIR}
 fi
 
-if [[ -z ${specific_image} || "${specific_image}" == "powa-collector" ]]; then
+if should_be_built "powa-web-git"; then
+    echo ""
+    echo "############################"
+    echo "##                         #"
+    echo "##      powa-web-git       #"
+    echo "##                         #"
+    echo "############################"
+    echo ""
+
+    BASEDIR="${DIRNAME}/powa-web-git"
+
+    build_image "powa-web-git" "-" "${BASEDIR}"
+fi
+
+if should_be_built "powa-collector"; then
     echo ""
     echo "############################"
     echo "##                         #"
@@ -258,19 +306,24 @@ if [[ -z ${specific_image} || "${specific_image}" == "powa-collector" ]]; then
     echo "##                         #"
     echo "############################"
     echo ""
-    # echo "Removing old images..."
 
     BASEDIR="${DIRNAME}/powa-collector"
 
     build_image "powa-collector" "${VER_COLLECTOR}" "${BASEDIR}"
+fi
 
-    # rmi "${ORG}/powa-collector:latest"
-    # rmi "${ORG}/powa-collector:${VER_COLLECTOR}"
-    #
-    # echo "Building powa-collector tag ${VER_COLLECTOR}..."
-    # docker build -q --no-cache -t ${NAME_COLLECTOR}:${VER_COLLECTOR} ${BASEDIR}
-    # echo "Updating powa-collector:latest..."
-    # docker build -q -t ${NAME_COLLECTOR}:latest ${BASEDIR}
+if should_be_built "powa-collector-git"; then
+    echo ""
+    echo "############################"
+    echo "##                         #"
+    echo "##    powa-collector-git   #"
+    echo "##                         #"
+    echo "############################"
+    echo ""
+
+    BASEDIR="${DIRNAME}/powa-collector-git"
+
+    build_image "powa-collector" "-" "${BASEDIR}"
 fi
 
 echo ""
