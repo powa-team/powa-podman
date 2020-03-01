@@ -3,12 +3,13 @@
 set -eo pipefail
 
 function usage {
-    echo "$0 [ -n ] [ -i image ][ -u github_username ] | -h] "
+    echo "$0 [ -n ] [ -i image [ -s subver ]][ -p ] [ -u github_username ] | -h] "
     echo ""
     echo " -h                   Show this message"
     echo " -i image             Only build a specific image. Suported values are"
     echo "                      powa-archivist, powa-web, powa-collector"
     echo " -n                   Don't clean the images"
+    echo " -p                   push the image after building"
     echo " -s subversion        Only build a specific subversion for a specific"
     echo "                      image. Requires usage of -i option, and only"
     echo "                      supported for powa-archivist."
@@ -21,8 +22,9 @@ specific_image=
 specific_subver=
 noclean="false"
 github_user=
+docker_push="false"
 
-while getopts "hi:ns:u:" name; do
+while getopts "hi:nps:u:" name; do
     case "${name}" in
         h)
             usage
@@ -39,6 +41,9 @@ while getopts "hi:ns:u:" name; do
             ;;
         n)
             noclean="true"
+            ;;
+        p)
+            docker_push="true"
             ;;
         s)
             specific_subver="${OPTARG}"
@@ -135,14 +140,25 @@ function build_image {
         rmi "${ORG}/${img_name}:latest"
     fi
 
+    # Update base image
+    base_image=$(egrep "^FROM " "${img_dir}/Dockerfile" | sed 's/FROM //')
+    echo "Pulling ${base_image}..."
+    docker pull "${base_image}"
+
     echo "Building ${ORG}/${img_name}:${img_version}..."
     docker build -q ${cache_flag} -t ${ORG}/${img_name}:${img_version} ${img_dir}
     echo "Updating ${ORG}/${img_name}:latest..."
     docker build -q -t ${ORG}/${img_name}:latest ${img_dir}
+    if [[ "${docker_push}" == "true" ]]; then
+        echo "Pushing ${ORG}/${img_name}:${img_version}..."
+        docker push "${ORG}/${img_name}:${img_version}"
+        echo "Pushing ${ORG}/${img_name}:latest..."
+        docker push "${ORG}/${img_name}:latest"
+    fi
 }
 
 echo ""
-echo "=================================="
+echo "==================================="
 echo "Minor versions to be built:"
 echo ""
 if [[ -z ${specific_image} || "${specific_image}" == "powa-archivist" ]]; then
@@ -157,7 +173,11 @@ fi
 if [[ -n "${specific_subver}" ]]; then
     echo "  Subversion: ${specific_subver}"
 fi
-echo "=================================="
+if [[ "${docker_push}" == "true" ]]; then
+    echo
+    echo "/!\ Built images will be pushed /!\ "
+fi
+echo "==================================="
 echo ""
 echo "Build images ? [y/N]"
 read cont
