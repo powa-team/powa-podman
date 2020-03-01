@@ -9,16 +9,20 @@ function usage {
     echo " -i image             Only build a specific image. Suported values are"
     echo "                      powa-archivist, powa-web, powa-collector"
     echo " -n                   Don't clean the images"
+    echo " -s subversion        Only build a specific subversion for a specific"
+    echo "                      image. Requires usage of -i option, and only"
+    echo "                      supported for powa-archivist."
     echo " -u github_username   User to use when calling github API"
 }
 
 DIRNAME="$(dirname $0)"
 
 specific_image=
+specific_subver=
 noclean="false"
 github_user=
 
-while getopts "hi:nu:" name; do
+while getopts "hi:ns:u:" name; do
     case "${name}" in
         h)
             usage
@@ -36,6 +40,9 @@ while getopts "hi:nu:" name; do
         n)
             noclean="true"
             ;;
+        s)
+            specific_subver="${OPTARG}"
+            ;;
         u)
             github_user="-u ${OPTARG}"
             ;;
@@ -45,6 +52,20 @@ while getopts "hi:nu:" name; do
             ;;
     esac
 done
+
+if [[ -n "${specific_subver}" && -z "${specific_image}" ]]; then
+    echo "-t option requires -i"
+    echo
+    usage
+    exit 1
+fi
+
+if [[ -n "${specific_subver}" && "${specific_image}" != "powa-archivist" ]]; then
+    echo "-t option is only compatible with powa-archivist image."
+    echo
+    usage
+    exit 1
+fi
 
 echo "######################"
 echo "#                    #"
@@ -133,6 +154,9 @@ fi
 if [[ -z ${specific_image} || "${specific_image}" == "powa-collector" ]]; then
     echo "${ORG}/powa-collector: ${VER_COLLECTOR}"
 fi
+if [[ -n "${specific_subver}" ]]; then
+    echo "  Subversion: ${specific_subver}"
+fi
 echo "=================================="
 echo ""
 echo "Build images ? [y/N]"
@@ -150,9 +174,17 @@ if [[ -z ${specific_image} || "${specific_image}" == "powa-archivist" ]]; then
     echo "##                         #"
     echo "############################"
     echo ""
+    if [[ -n "${specific_subver}" ]]; then
+        echo "Subversion: ${specific_subver}"
+        echo
+    fi
 
     BASEDIR="$DIRNAME/powa-archivist"
     for version in $(ls "$BASEDIR" | egrep '[0-9](+\.[0-9]+)?'); do
+        # filter subversion if asked
+        if [[ -n "${specific_subver}" && "${specific_subver}" != "${version}" ]]; then
+            continue
+        fi
         echo "Version $version"
         echo "================"
         echo ""

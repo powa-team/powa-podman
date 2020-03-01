@@ -4,6 +4,7 @@ all:
 	cp -r misc/powa-web.conf powa-web-git/
 	cp -r misc/powa-collector.conf powa-collector/
 	cp -r misc/powa-collector.conf powa-collector-git/
+
 images: all git
 	./build_all.sh
 
