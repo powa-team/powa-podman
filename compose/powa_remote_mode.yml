@@ -5,6 +5,7 @@ services:
     image: powateam/powa-archivist-git
     container_name: powa-git-repository
     environment:
+      POSTGRES_HOST_AUTH_METHOD: 'trust'
       POWA_EXTRA_SQL: >
         SELECT powa_register_server(hostname => 'powa-git-remote-primary',
           alias => 'primary',
@@ -40,6 +41,7 @@ services:
     image: powateam/powa-archivist-git
     container_name: powa-git-remote-primary
     environment:
+      POSTGRES_HOST_AUTH_METHOD: 'trust'
       POWA_ROLE: 'PRIMARY'
       POWA_LOCAL_SNAPSHOT: 'NO'
 
@@ -47,6 +49,7 @@ services:
     image: powateam/powa-archivist-git
     container_name: powa-git-remote-standby
     environment:
+      POSTGRES_HOST_AUTH_METHOD: 'trust'
       POWA_ROLE: 'STANDBY'
       POWA_PRIMARY: 'remote-primary'
       POWA_LOCAL_SNAPSHOT: 'NO'

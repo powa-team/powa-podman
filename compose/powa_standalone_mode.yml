@@ -4,6 +4,8 @@ services:
   powa-repository:
     image: powateam/powa-archivist-12
     container_name: powa-standalone-repository
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: 'trust'
 
   powa-web:
     image: powateam/powa-web
