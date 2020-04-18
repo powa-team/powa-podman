@@ -3,7 +3,8 @@
 set -eo pipefail
 
 function usage {
-    echo "$0 [ -n ] [ -i image [ -s subver ]][ -p ] [ -u github_username ] | -h] "
+    echo "$0 [ -n ] [ -i image [ -s subver ]][ -p ] [ -u github_username ] [-v ]"
+    echo "$0 -h"
     echo ""
     echo " -h                   Show this message"
     echo " -i image             Only build a specific image. Suported values are"
@@ -15,6 +16,7 @@ function usage {
     echo "                      image. Requires usage of -i option, and only"
     echo "                      supported for powa-archivist."
     echo " -u github_username   User to use when calling github API"
+    echo " -v                   Verbose mode"
 }
 
 DIRNAME="$(dirname $0)"
@@ -24,8 +26,9 @@ specific_subver=
 noclean="false"
 github_user=
 docker_push="false"
+quiet_flag="-q"
 
-while getopts "hi:nps:u:" name; do
+while getopts "hi:nps:u:v" name; do
     case "${name}" in
         h)
             usage
@@ -56,6 +59,9 @@ while getopts "hi:nps:u:" name; do
             ;;
         u)
             github_user="-u ${OPTARG}"
+            ;;
+        v)
+            quiet_flag=""
             ;;
         *)
             usage
@@ -179,7 +185,7 @@ function build_image {
             continue
         fi
         echo "Building ${ORG}/${img_name}:${tag}..."
-        docker build -q ${cache_flag} -t ${ORG}/${img_name}:${tag} ${img_dir}
+        docker build ${quiet_flag} ${cache_flag} -t ${ORG}/${img_name}:${tag} ${img_dir}
         if [[ "${docker_push}" == "true" ]]; then
             echo "Pushing ${ORG}/${img_name}:${tag}..."
             docker push "${ORG}/${img_name}:${tag}"
