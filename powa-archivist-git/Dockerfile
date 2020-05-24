@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
     && git clone https://github.com/powa-team/powa-archivist.git \
     && git clone https://github.com/powa-team/pg_qualstats.git \
     && git clone https://github.com/powa-team/pg_stat_kcache.git \
-    && git clone https://github.com/hypopg/hypopg.git \
+    && git clone https://github.com/hypopg/hypopg.git --branch REL1_STABLE \
     && git clone https://github.com/rjuju/pg_track_settings.git \
     && git clone https://github.com/postgrespro/pg_wait_sampling.git \
     && for f in $(ls); do cd $f; make USE_PGXS=1 install; cd ..; rm -rf $f; done \
