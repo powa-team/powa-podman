@@ -171,7 +171,7 @@ function build_image {
         cache_flag="--no-cache"
         echo "Cleaning ${ORG}/${img_name}..."
         rmi "${ORG}/${img_name}:${img_version}"
-        echo "Cleaning ${ORG}/latest..."
+        echo "Cleaning ${ORG}/${img_name}:latest..."
         rmi "${ORG}/${img_name}:latest"
     fi
 
@@ -329,7 +329,7 @@ if should_be_built "powa-collector-git"; then
 
     BASEDIR="${DIRNAME}/powa-collector-git"
 
-    build_image "powa-collector" "-" "${BASEDIR}"
+    build_image "powa-collector-git" "-" "${BASEDIR}"
 fi
 
 echo ""
