@@ -3,7 +3,7 @@
 set -eo pipefail
 
 function usage {
-    echo "$0 [ -n ] [ -i image [ -s subver ]][ -p ] [ -u github_username ] [-v ]"
+    echo "$0 [ -n ] [ -i image [ -s subver ]][ -p ] [-v ]"
     echo "$0 -h"
     echo ""
     echo " -h                   Show this message"
@@ -15,7 +15,6 @@ function usage {
     echo " -s subversion        Only build a specific subversion for a specific"
     echo "                      image. Requires usage of -i option, and only"
     echo "                      supported for powa-archivist."
-    echo " -u github_username   User to use when calling github API"
     echo " -v                   Verbose mode"
 }
 
@@ -24,7 +23,6 @@ DIRNAME="$(dirname $0)"
 specific_image=""
 specific_subver=
 noclean="false"
-github_user=
 docker_push="false"
 quiet_flag="-q"
 
@@ -60,9 +58,6 @@ while getopts "hi:nps:u:v" name; do
             ;;
         s)
             specific_subver="${OPTARG}"
-            ;;
-        u)
-            github_user="-u ${OPTARG}"
             ;;
         v)
             quiet_flag=""
