@@ -11,12 +11,12 @@ RUN apt-get update && apt-get install -y \
     postgresql-contrib-%%PG_VER%% \
     postgresql-server-dev-%%PG_VER%% \
     wget \
-    && wget -O- $(wget -O- https://api.github.com/repos/powa-team/powa-archivist/releases/latest|jq -r '.tarball_url') | tar -xzf - \
-    && wget -O- $(wget -O- https://api.github.com/repos/powa-team/pg_qualstats/releases/latest|jq -r '.tarball_url') | tar -xzf - \
-    && wget -O- $(wget -O- https://api.github.com/repos/powa-team/pg_stat_kcache/releases/latest|jq -r '.tarball_url') | tar -xzf - \
-    && wget -O- $(wget -O- https://api.github.com/repos/hypopg/hypopg/releases/latest|jq -r '.tarball_url') | tar -xzf - \
-    && wget -O- $(wget -O- https://api.github.com/repos/rjuju/pg_track_settings/releases/latest|jq -r '.tarball_url') | tar -xzf - \
-    && wget -O- $(wget -O- https://api.github.com/repos/postgrespro/pg_wait_sampling/releases/latest|jq -r '.tarball_url') | tar -xzf - \
+    && wget -O- https://github.com/powa-team/powa-archivist/archive/%%POWA_VER%%.tar.gz | tar -xzf - \
+    && wget -O- https://github.com/powa-team/pg_qualstats/archive/%%PGQS_VER%%.tar.gz | tar -xzf - \
+    && wget -O- https://github.com/powa-team/pg_stat_kcache/archive/%%PGSK_VER%%.tar.gz | tar -xzf - \
+    && wget -O- https://github.com/hypopg/hypopg/archive/%%HYPOPG_VER%%.tar.gz | tar -xzf - \
+    && wget -O- https://github.com/rjuju/pg_track_settings/archive/%%PGTS_VER%%.tar.gz | tar -xzf - \
+    && wget -O- https://github.com/postgrespro/pg_wait_sampling/archive/%%PGWS_VER%%.tar.gz | tar -xzf - \
     && for f in $(ls); do cd $f; make USE_PGXS=1 install; cd ..; rm -rf $f; done \
     && apt-get purge -y --auto-remove gcc jq make postgresql-server-dev-%%PG_VER%% wget \
     && rm -rf /var/lib/apt/lists/*
