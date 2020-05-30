@@ -46,7 +46,11 @@ while getopts "hi:nps:u:v" name; do
                 exit 1
             fi
 
-            specific_image="${specific_image} ${OPTARG}"
+            if [[ -z "${specific_image}" ]]; then
+                specific_image="${OPTARG}"
+            else
+                specific_image="${specific_image} ${OPTARG}"
+            fi
             ;;
         n)
             noclean="true"
@@ -71,14 +75,14 @@ while getopts "hi:nps:u:v" name; do
 done
 
 if [[ -n "${specific_subver}" && -z "${specific_image}" ]]; then
-    echo "-t option requires -i"
+    echo "-s option requires -i"
     echo
     usage
     exit 1
 fi
 
 if [[ -n "${specific_subver}" && "${specific_image}" != "powa-archivist" ]]; then
-    echo "-t option is only compatible with powa-archivist image."
+    echo "-s option is only compatible with powa-archivist image."
     echo
     usage
     exit 1
