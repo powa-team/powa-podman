@@ -3,7 +3,7 @@ ifdef DOCKER_PUSH
 BUILD_CMD += -p
 endif
 
-.PHONY: git git-misc powa-archivist-git powa-web-git powa-collector-git
+.PHONY: git git-misc powa-archivist powa-archivist-git powa-web-git powa-collector-git
 
 all:
 	$(MAKE) -C powa-archivist
@@ -16,6 +16,10 @@ all:
 
 images: all git-misc
 	${BUILD_CMD}
+
+powa-archivist:
+	$(MAKE) -C powa-archivist
+	${BUILD_CMD} -i powa-archivist
 
 powa-archivist-git-misc: misc/setup_powa-archivist.sh misc/install_all_powa_ext.sql
 	cp -r misc/setup_powa-archivist.sh powa-archivist-git/
