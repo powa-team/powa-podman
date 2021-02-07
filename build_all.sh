@@ -168,8 +168,10 @@ function build_image {
 
     if [[ "${noclean}" == "false" ]]; then
         cache_flag="--no-cache"
-        echo "Cleaning ${ORG}/${img_name}..."
-        rmi "${ORG}/${img_name}:${img_version}"
+        if [[ "${img_version}" != "latest" ]]; then
+            echo "Cleaning ${ORG}/${img_name}..."
+            rmi "${ORG}/${img_name}:${img_version}"
+        fi
         echo "Cleaning ${ORG}/${img_name}:latest..."
         rmi "${ORG}/${img_name}:latest"
     fi
@@ -179,17 +181,20 @@ function build_image {
     echo "Pulling ${base_image}..."
     docker pull "${base_image}"
 
-    for tag in "${img_version}" "latest"; do
-        if [[ "${tag}" == "-" ]]; then
-            continue
+    echo "Building ${ORG}/${img_name}:${img_version}..."
+    docker build ${quiet_flag} ${cache_flag} -t ${ORG}/${img_name}:${img_version} ${img_dir}
+    if [[ "${img_version}" != "latest" ]]; then
+        docker tag ${ORG}/${img_name}:${img_version} ${ORG}/${img_name}:latest
+    fi
+
+    if [[ "${docker_push}" == "true" ]]; then
+        if [[ "${img_version}" != "latest" ]]; then
+            echo "Pushing ${ORG}/${img_name}:${img_version}..."
+            docker push "${ORG}/${img_name}:${img_version}"
         fi
-        echo "Building ${ORG}/${img_name}:${tag}..."
-        docker build ${quiet_flag} ${cache_flag} -t ${ORG}/${img_name}:${tag} ${img_dir}
-        if [[ "${docker_push}" == "true" ]]; then
-            echo "Pushing ${ORG}/${img_name}:${tag}..."
-            docker push "${ORG}/${img_name}:${tag}"
-        fi
-    done
+        echo "Pushing ${ORG}/${img_name}:latest..."
+        docker push "${ORG}/${img_name}:latest"
+    fi
 }
 
 echo ""
@@ -272,7 +277,7 @@ if should_be_built "powa-archivist-git"; then
     echo ""
     BASEDIR="${DIRNAME}/powa-archivist-git"
 
-    build_image "powa-archivist-git" "-" "${BASEDIR}"
+    build_image "powa-archivist-git" "latest" "${BASEDIR}"
 fi
 
 if should_be_built "powa-web"; then
@@ -300,7 +305,7 @@ if should_be_built "powa-web-git"; then
 
     BASEDIR="${DIRNAME}/powa-web-git"
 
-    build_image "powa-web-git" "-" "${BASEDIR}"
+    build_image "powa-web-git" "latest" "${BASEDIR}"
 fi
 
 if should_be_built "powa-collector"; then
@@ -328,7 +333,7 @@ if should_be_built "powa-collector-git"; then
 
     BASEDIR="${DIRNAME}/powa-collector-git"
 
-    build_image "powa-collector-git" "-" "${BASEDIR}"
+    build_image "powa-collector-git" "latest" "${BASEDIR}"
 fi
 
 echo ""
