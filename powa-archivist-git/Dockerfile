@@ -1,5 +1,5 @@
 #vim: set ft=dockerfile
-FROM postgres:12
+FROM postgres:13
 MAINTAINER Julien Rouhaud <rjuju123@gmail.com>
 
 WORKDIR /usr/local/src
@@ -7,8 +7,8 @@ WORKDIR /usr/local/src
 RUN apt-get update && apt-get install -y \
     gcc \
     make \
-    postgresql-contrib-12 \
-    postgresql-server-dev-12 \
+    postgresql-contrib-13 \
+    postgresql-server-dev-13 \
     git \
     && git clone https://github.com/powa-team/powa-archivist.git \
     && git clone https://github.com/powa-team/pg_qualstats.git \
@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y \
     && git clone https://github.com/rjuju/pg_track_settings.git \
     && git clone https://github.com/postgrespro/pg_wait_sampling.git \
     && for f in $(ls); do cd $f; make USE_PGXS=1 install; cd ..; rm -rf $f; done \
-    && apt-get purge -y --auto-remove gcc make postgresql-server-dev-12 wget \
+    && apt-get purge -y --auto-remove gcc make postgresql-server-dev-13 wget \
     && rm -rf /var/lib/apt/lists/*
 
 # configure powa-archivist and all supported extensions
