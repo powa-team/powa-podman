@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     python \
     python-dev \
     python-pip \
+    python-six \
     git \
     && git clone https://github.com/powa-team/powa-web.git powa-web.git \
     && pip install psycopg2 sqlalchemy tornado \

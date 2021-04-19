@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     python \
     python-dev \
     python-pip \
+    python-six \
     && pip install sqlalchemy \
     && pip install powa-web \
     && apt-get purge -y --auto-remove libpq-dev python-dev python-pip \
