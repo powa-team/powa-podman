@@ -28,6 +28,9 @@ powa-archivist-git-misc: misc/setup_powa-archivist.sh misc/install_all_powa_ext.
 powa-archivist-git: powa-archivist-git-misc
 	$(BUILD_CMD) -i powa-archivist-git
 
+powa-web: all
+	${BUILD_CMD} -i powa-web
+
 powa-web-git-misc: misc/powa-web.conf
 	cp -r misc/powa-web.conf powa-web-git/
 
