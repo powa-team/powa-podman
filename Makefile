@@ -5,12 +5,10 @@ endif
 
 .PHONY: git git-misc powa-archivist powa-archivist-git powa-web-git powa-collector-git
 
-all:
+all: powa-web-misc
 	$(MAKE) -C powa-archivist
 	cp -r misc/setup_powa-archivist.sh powa-archivist-git/
 	cp -r misc/install_all_powa_ext.sql powa-archivist-git/
-	cp -r misc/powa-web.conf powa-web/
-	cp -r misc/powa-web.conf powa-web-git/
 	cp -r misc/powa-collector.conf powa-collector/
 	cp -r misc/powa-collector.conf powa-collector-git/
 
@@ -28,7 +26,11 @@ powa-archivist-git-misc: misc/setup_powa-archivist.sh misc/install_all_powa_ext.
 powa-archivist-git: powa-archivist-git-misc
 	$(BUILD_CMD) -i powa-archivist-git
 
-powa-web: all
+powa-web-misc:
+	cp -r misc/powa-web.conf powa-web/
+	cp -r misc/powa-web.conf powa-web-git/
+
+powa-web: powa-web-misc
 	${BUILD_CMD} -i powa-web
 
 powa-web-git-misc: misc/powa-web.conf
