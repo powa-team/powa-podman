@@ -1,0 +1,37 @@
+version: "2"
+
+services:
+  powa-repository:
+    image: powateam/powa-archivist-git
+    container_name: powa-dev-repository
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: 'trust'
+      POWA_EXTRA_SQL: >
+        DROP EXTENSION pg_stat_kcache;
+        DROP EXTENSION pg_qualstats;
+        DROP EXTENSION pg_track_settings;
+        DROP EXTENSION powa;
+        DROP EXTENSION pg_wait_sampling;
+        CREATE EXTENSION powa;
+
+  powa-web-dev:
+    image: powateam/powa-web-dev
+    container_name: powa-dev-web
+    command: "powa-web-dev/run_powa.py"
+    ports:
+      - 8888:8888
+    volumes:
+      - '${POWA_WEB_GIT}:/usr/local/src/powa-web-dev'
+    links:
+      - powa-repository
+
+  pgbench-std-primary:
+    image: powateam/powa-pgbench
+    container_name: powa-dev-pgbench-std-primary
+    restart: on-failure
+    environment:
+      PGHOST: 'powa-repository'
+      PGUSER: 'postgres'
+      BENCH_SCALE_FACTOR: 10
+      BENCH_TIME: 60
+      BENCH_FLAG: '-c1 -j1 -n -R 10'

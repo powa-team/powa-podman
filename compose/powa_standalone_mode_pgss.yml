@@ -1,0 +1,23 @@
+version: "2"
+
+services:
+  powa-repository:
+    image: powateam/powa-archivist-12
+    container_name: powa-standalone-repository
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: 'trust'
+      POWA_EXTRA_SQL: >
+        DROP EXTENSION pg_stat_kcache;
+        DROP EXTENSION pg_qualstats;
+        DROP EXTENSION pg_track_settings;
+        DROP EXTENSION powa;
+        DROP EXTENSION pg_wait_sampling;
+        CREATE EXTENSION powa;
+
+  powa-web:
+    image: powateam/powa-web
+    container_name: powa-standalone-web
+    ports:
+      - 8888:8888
+    links:
+      - powa-repository
