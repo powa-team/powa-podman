@@ -1,5 +1,5 @@
 #vim:set ft=dockerfile
-FROM debian:stretch-slim
+FROM debian:stable-slim
 MAINTAINER Julien Rouhaud <rjuju123@gmail.com>
 
 WORKDIR /usr/local/src
@@ -7,13 +7,12 @@ WORKDIR /usr/local/src
 RUN apt-get update && apt-get install -y \
     libpq5 \
     libpq-dev \
-    python \
-    python-dev \
-    python-pip \
-    python-six \
-    && pip install sqlalchemy \
-    && pip install powa-web \
-    && apt-get purge -y --auto-remove libpq-dev python-dev python-pip \
+    python3 \
+    python3-dev \
+    python3-pip \
+    && pip3 install sqlalchemy \
+    && pip3 install powa-web \
+    && apt-get purge -y --auto-remove libpq-dev python3-dev python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
 COPY powa-web.conf /etc/
