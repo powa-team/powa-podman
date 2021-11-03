@@ -1,0 +1,26 @@
+#vim: set ft=dockerfile
+FROM postgres:14
+MAINTAINER Julien Rouhaud <rjuju123@gmail.com>
+
+WORKDIR /usr/local/src
+
+RUN apt-get update && apt-get install -y \
+    gcc \
+    jq \
+    make \
+    postgresql-contrib-14 \
+    postgresql-server-dev-14 \
+    wget \
+    && wget -O- https://github.com/powa-team/powa-archivist/archive/REL_4_1_2.tar.gz | tar -xzf - \
+    && wget -O- https://github.com/powa-team/pg_qualstats/archive/2.0.3.tar.gz | tar -xzf - \
+    && wget -O- https://github.com/powa-team/pg_stat_kcache/archive/REL2_2_0.tar.gz | tar -xzf - \
+    && wget -O- https://github.com/hypopg/hypopg/archive/1.3.1.tar.gz | tar -xzf - \
+    && wget -O- https://github.com/rjuju/pg_track_settings/archive/2.0.1.tar.gz | tar -xzf - \
+    && wget -O- https://github.com/postgrespro/pg_wait_sampling/archive/v1.1.3.tar.gz | tar -xzf - \
+    && for f in $(ls); do cd $f; make USE_PGXS=1 install; cd ..; rm -rf $f; done \
+    && apt-get purge -y --auto-remove gcc jq make postgresql-server-dev-14 wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# configure powa-archivist and all supported extensions
+ADD setup_powa-archivist.sh /docker-entrypoint-initdb.d/
+ADD install_all_powa_ext.sql /usr/local/src/
