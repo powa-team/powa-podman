@@ -6,16 +6,18 @@ function get_psql {
 
     if [[ -z "${_db}" || -z ${_query} ]]; then
         echo "Not enough arguments provided!"
+        sleep 1
         exit 1
     fi
 
     local _res=$(psql -AXtc "${_query}" "${_db}")
-    if [[ $? -ne 0 ]]; then
+    if [[ $? -ne 0 || ${_res} == "" ]]; then
         echo "Execution error on ${_db} - ${_query}"
+        sleep 1
         exit 1
     fi
 
-    echo ${_res}
+    echo "${_res}"
 }
 
 # we try to connect to db powa as the server may restart before that point
@@ -26,16 +28,18 @@ dbname=${BENCH_DB:-pgbench}
 
 echo "Checking if ${dbname} exists..."
 nb=$(get_psql "postgres" "SELECT COUNT(*) FROM pg_database WHERE datname = '${dbname}'")
-if [[ $nb -eq 0 ]]; then
+if [[ "$nb" == "0" ]]; then
     echo "Database ${dbname} does not exist"
     if [[ -z "${BENCH_SKIP_INIT}" ]]; then
         echo "Creating database ${dbname}"
         createdb ${dbname}
         if [[ $? -ne 0 ]]; then
             echo "Error trying to create database!"
+            sleep 1
             exit 1
         fi
     else
+        sleep 1
         exit 1
     fi;
 else
@@ -44,7 +48,7 @@ fi
 
 echo "Checking pgbench tables..."
 nb=$(get_psql "${dbname}" "SELECT COUNT(*) FROM pg_class WHERE relname ~ 'pgbench_' AND relkind = 'r'")
-if [[ $nb -eq 0 ]]; then
+if [[ "$nb" == "0" ]]; then
     echo "No table in ${dbname}"
     if [[ -z "${BENCH_SKIP_INIT}" ]]; then
         echo "Waiting a bit and initializing data"
@@ -52,23 +56,27 @@ if [[ $nb -eq 0 ]]; then
         pgbench -i -s ${BENCH_SCALE_FACTOR:-10} -d ${dbname}
         if [[ $? -ne 0 ]]; then
             echo "Error trying to initialize data!"
+            sleep 1
             exit 1
         fi
     else
+        sleep 1
         exit 1
     fi
-elif [[ $nb -ne 4 ]]; then
+elif [[ "$nb" != "4" ]]; then
     echo "Missing tables, starting from scratch"
     if [[ -z "${BENCH_SKIP_INIT}" ]]; then
         dropdb ${dbname}
     fi
+    sleep 1
     exit 1
 fi
 
 echo "Checking content in pgbench tables..."
 nb=$(get_psql "${dbname}" "SELECT COUNT(*) FROM pgbench_accounts")
-if [[ $nb -eq 0 ]]; then
+if [[ "$nb" == "0" ]]; then
     echo "No data in pgbench tables on ${dbname}"
+    sleep 1
     exit 1
 fi
 
@@ -77,6 +85,7 @@ while [[ true ]]; do
     pgbench -d ${dbname} -T ${BENCH_TIME:-60} ${BENCH_FLAG} >/dev/null 2>&1
     if [[ $? -ne 0 ]]; then
         echo "Error running pgbench!"
+        sleep 1
         exit 1
     fi
     echo "Sleeping for ${BENCH_SLEEP_TIME:-10}"

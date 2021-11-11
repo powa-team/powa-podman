@@ -1,5 +1,5 @@
-Developers docker images
-========================
+Developer container images
+==========================
 
 This repository contains a set of images that can be useful if you want to work
 on either powa-web, the User Interface of the PoWA project, or powa-collector,
@@ -34,9 +34,9 @@ Here is the list of available images with their specificities:
   - BENCH_SLEEP_TIME: Time to sleep between to pgbench occurence, in seconds.
     Default is 10.
 
-On top of that, a docker-compose file (powa-dev.yml) is also provided.  This
-will setup a full working PoWA environment based on the -git version of
-powa-archivist, with the following setup:
+On top of that, multiple compose file are also provided.  The main one,
+powa-dev.yml will setup a full working PoWA environment based on the -git
+version of powa-archivist, with the following setup:
 
 - a powa-archivist-git image for the repository server
 
@@ -53,9 +53,18 @@ powa-archivist, with the following setup:
 - two powa-pgbench images, that will run pgbench workload on the primary and
   standby instances.
 
-Simply launching this docker-compose setup should be enough to test most
-features in PoWA.
+Simply launching this podman-compose should be enough to test most features in
+PoWA.
 
-POWA_WEB_GIT=/path/to/powa-web POWA_COLLECTOR_GIT=/path/to/powa-collector docker-compose -f powa-dev.yml up
+POWA_WEB_GIT=/path/to/powa-web POWA_COLLECTOR_GIT=/path/to/powa-collector podman-compose -f powa-dev.yml up
 
 Load http://0.0.0.0:8888 in your browser.
+
+The other compose files correspond to other kind of setup, for instance:
+
+- powa-dev-standalone.yml will create a standalone environment rather than
+  using the remote mode added in Powa 4
+- powa-dev_pgss.yml and powa-dev-standby_pgss.yml will create the same
+  environment as respectively powa-dev.yml and powa-dev-standby.yml  but
+  won't register any additional extension, so only pg_stat_statements (and
+  powa-archivist) will be used

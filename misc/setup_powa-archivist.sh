@@ -39,17 +39,28 @@ if [[ "${POWA_ROLE}"  == "PRIMARY" ]]; then
         psql -d powa -c "${POWA_EXTRA_SQL}"
     fi
 else
-    pg_ctl -D "${PGDATA}" -w stop -m immediate
-    >&2 echo "Purging old data in ${PGDATA}..."
-    rm -rf "${PGDATA}"/*
+    REPLI_OK=false
 
-    # wait for primary to be online, with powa setup
-    until psql -h "${POWA_PRIMARY}" -U "postgres" -d powa -c '\q'; do
-        >&2 echo "PoWA is not ready yet, sleeping 1s..."
-        sleep 1
+    while [[ ${REPLI_OK} == "false" ]]; do
+        pg_ctl -D "${PGDATA}" -w stop -m immediate
+        >&2 echo "Purging old data in ${PGDATA}..."
+        rm -rf "${PGDATA}"/*
+
+        # wait for primary to be online, with powa setup
+        until psql -h "${POWA_PRIMARY}" -p "${POWA_PRIMARY_PORT:-5432}" -U "postgres" -d powa -c '\q'; do
+            >&2 echo "PoWA is not ready yet, sleeping 1s..."
+            sleep 1
+        done
+
+        pg_basebackup -D ${PGDATA} -R -X stream -c fast -h ${POWA_PRIMARY} -p "${POWA_PRIMARY_PORT:-5432}"
+        if [[ $? -ne 0 ]]; then
+            >&2 echo "Error during pg_basebackup, trying again in 1s"
+            sleep 1
+            continue
+        fi
+
+        echo "shared_preload_libraries = 'pg_stat_statements,pg_qualstats,pg_stat_kcache,pg_wait_sampling'" >> ${PGDATA}/postgresql.conf
+        pg_ctl -D "${PGDATA}" -w start
+        REPLI_OK=true
     done
-
-    pg_basebackup -D ${PGDATA} -R -X stream -c fast -h ${POWA_PRIMARY}
-    echo "shared_preload_libraries = 'pg_stat_statements,pg_qualstats,pg_stat_kcache,pg_wait_sampling'" >> ${PGDATA}/postgresql.conf
-    pg_ctl -D "${PGDATA}" -w start
 fi

@@ -3,17 +3,17 @@
 set -eo pipefail
 
 cur_dir="$(dirname $0)"
-template="${cur_dir}/Dockerfile.template"
+template="${cur_dir}/Containerfile.template"
 sh="setup_powa-archivist.sh"
 sql="install_all_powa_ext.sql"
 API_URL="https://api.github.com"
 
-echo "########################"
-echo "#                      #"
-echo "# Updating Dockerfiles #"
-echo "# for powa-archivist   #"
-echo "#                      #"
-echo "########################"
+echo "###########################"
+echo "#                         #"
+echo "# Updating Containerfiles #"
+echo "# for powa-archivist      #"
+echo "#                         #"
+echo "###########################"
 
 echo "Retrieving extension versions..."
 
@@ -39,20 +39,20 @@ for pg_version in $(ls "${cur_dir}"| egrep '[0-9]+(\.[0-9]+)?'); do
     echo ""
 
     full_path="${cur_dir}/${pg_version}"
-    dockerfile="${full_path}/Dockerfile"
+    containerfile="${full_path}/Containerfile"
 
     # clean everything in the X.Y directory
     rm -f "${full_path}/*"
 
-    # create new Dockerfile
-    sed "s/%%PG_VER%%/${pg_version}/g" "$template" > "${dockerfile}"
+    # create new Containerfile
+    sed "s/%%PG_VER%%/${pg_version}/g" "$template" > "${containerfile}"
     # Set the download URL
-    sed -i "s/%%POWA_VER%%/${POWA_VERSION}/g" "${dockerfile}"
-    sed -i "s/%%PGQS_VER%%/${PGQS_VERSION}/g" "${dockerfile}"
-    sed -i "s/%%PGSK_VER%%/${PGSK_VERSION}/g" "${dockerfile}"
-    sed -i "s/%%HYPOPG_VER%%/${HYPOPG_VERSION}/g" "${dockerfile}"
-    sed -i "s/%%PGTS_VER%%/${PGTS_VERSION}/g" "${dockerfile}"
-    sed -i "s/%%PGWS_VER%%/${PGWS_VERSION}/g" "${dockerfile}"
+    sed -i "s/%%POWA_VER%%/${POWA_VERSION}/g" "${containerfile}"
+    sed -i "s/%%PGQS_VER%%/${PGQS_VERSION}/g" "${containerfile}"
+    sed -i "s/%%PGSK_VER%%/${PGSK_VERSION}/g" "${containerfile}"
+    sed -i "s/%%HYPOPG_VER%%/${HYPOPG_VERSION}/g" "${containerfile}"
+    sed -i "s/%%PGTS_VER%%/${PGTS_VERSION}/g" "${containerfile}"
+    sed -i "s/%%PGWS_VER%%/${PGWS_VERSION}/g" "${containerfile}"
 
     # add the needed resources
     cp "${cur_dir}/${sh}" "${full_path}/${sh}"

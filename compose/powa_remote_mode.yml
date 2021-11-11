@@ -10,11 +10,13 @@ services:
         SELECT powa_register_server(hostname => 'powa-git-remote-primary',
           alias => 'primary',
           username => 'postgres',
+          port => 5433,
           frequency => 15,
           extensions => '{pg_stat_kcache,pg_qualstats,pg_wait_sampling,pg_track_settings}');
         SELECT powa_register_server(hostname => 'powa-git-remote-standby',
           alias => 'standby',
           username => 'postgres',
+          port => 5434,
           frequency => 15,
           extensions => '{pg_stat_kcache,pg_qualstats,pg_wait_sampling,pg_track_settings}');
 
@@ -41,6 +43,7 @@ services:
     image: powateam/powa-archivist-git
     container_name: powa-git-remote-primary
     environment:
+      PGPORT: 5433
       POSTGRES_HOST_AUTH_METHOD: 'trust'
       POWA_ROLE: 'PRIMARY'
       POWA_LOCAL_SNAPSHOT: 'NO'
@@ -49,6 +52,7 @@ services:
     image: powateam/powa-archivist-git
     container_name: powa-git-remote-standby
     environment:
+      PGPORT: 5434
       POSTGRES_HOST_AUTH_METHOD: 'trust'
       POWA_ROLE: 'STANDBY'
       POWA_PRIMARY: 'remote-primary'

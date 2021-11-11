@@ -23,7 +23,7 @@ DIRNAME="$(dirname $0)"
 specific_image=""
 specific_subver=
 noclean="false"
-docker_push="false"
+do_push="false"
 quiet_flag="-q"
 
 while getopts "hi:nps:u:v" name; do
@@ -54,7 +54,7 @@ while getopts "hi:nps:u:v" name; do
             noclean="true"
             ;;
         p)
-            docker_push="true"
+            do_push="true"
             ;;
         s)
             specific_subver="${OPTARG}"
@@ -138,9 +138,9 @@ function rmi {
         exit 1
     fi
 
-    nb=$(docker images $image |wc -l)
+    nb=$(podman images $image |wc -l)
     if [[ $nb -eq 2 ]]; then
-        docker rmi --force $image
+        podman rmi --force $image
     fi
 }
 
@@ -177,23 +177,23 @@ function build_image {
     fi
 
     # Update base image
-    base_image=$(egrep "^FROM " "${img_dir}/Dockerfile" | sed 's/FROM //')
+    base_image=$(egrep "^FROM " "${img_dir}/Containerfile" | sed 's/FROM //')
     echo "Pulling ${base_image}..."
-    docker pull "${base_image}"
+    podman pull "${base_image}"
 
     echo "Building ${ORG}/${img_name}:${img_version}..."
-    docker build ${quiet_flag} ${cache_flag} -t ${ORG}/${img_name}:${img_version} ${img_dir}
+    podman build ${quiet_flag} ${cache_flag} -t ${ORG}/${img_name}:${img_version} ${img_dir}
     if [[ "${img_version}" != "latest" ]]; then
-        docker tag ${ORG}/${img_name}:${img_version} ${ORG}/${img_name}:latest
+        podman tag ${ORG}/${img_name}:${img_version} ${ORG}/${img_name}:latest
     fi
 
-    if [[ "${docker_push}" == "true" ]]; then
+    if [[ "${do_push}" == "true" ]]; then
         if [[ "${img_version}" != "latest" ]]; then
             echo "Pushing ${ORG}/${img_name}:${img_version}..."
-            docker push "${ORG}/${img_name}:${img_version}"
+            podman push "${ORG}/${img_name}:${img_version}"
         fi
         echo "Pushing ${ORG}/${img_name}:latest..."
-        docker push "${ORG}/${img_name}:latest"
+        podman push "${ORG}/${img_name}:latest"
     fi
 }
 
@@ -222,7 +222,7 @@ fi
 if [[ -n "${specific_subver}" ]]; then
     echo "  Subversion: ${specific_subver}"
 fi
-if [[ "${docker_push}" == "true" ]]; then
+if [[ "${do_push}" == "true" ]]; then
     echo
     echo "/!\ Built images will be pushed /!\ "
 fi

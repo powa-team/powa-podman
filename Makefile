@@ -1,5 +1,5 @@
 BUILD_CMD = ./build_all.sh
-ifdef DOCKER_PUSH
+ifdef CONTAINER_PUSH
 BUILD_CMD += -p
 endif
 
