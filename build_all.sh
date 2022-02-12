@@ -114,6 +114,7 @@ echo "#                    #"
 echo "######################"
 
 ORG="powateam"
+OCI_ARCHIVE="docker://docker.io"
 
 # get a X.Y.Z information from the latest release name, which should be
 # "version X.Y.Z". The release name can be easily edited, so this should be
@@ -188,12 +189,13 @@ function build_image {
     fi
 
     if [[ "${do_push}" == "true" ]]; then
+        fqimg="${ORG}/${img_name}"
         if [[ "${img_version}" != "latest" ]]; then
-            echo "Pushing ${ORG}/${img_name}:${img_version}..."
-            podman push "${ORG}/${img_name}:${img_version}"
+            echo "Pushing ${fqimg}:${img_version}..."
+            podman push "${fqimg}:${img_version}" ${OCI_ARCHIVE}/${fqimg}:$[img_version]
         fi
-        echo "Pushing ${ORG}/${img_name}:latest..."
-        podman push "${ORG}/${img_name}:latest"
+        echo "Pushing ${fqimg}:latest..."
+        podman push "${fqimg}:latest" ${OCI_ARCHIVE}/${fqimg}:latest
     fi
 }
 
