@@ -24,7 +24,7 @@ services:
     image: powateam/powa-collector-dev
     container_name: powa-dev-collector
     restart: on-failure
-    command: "powa-collector-dev/powa-collector.py"
+    command: "python3 powa-collector-dev/powa-collector.py"
     volumes:
       - '${POWA_COLLECTOR_GIT}:/usr/local/src/powa-collector-dev'
     links:
@@ -35,7 +35,7 @@ services:
   powa-web-dev:
     image: powateam/powa-web-dev
     container_name: powa-dev-web
-    command: "powa-web-dev/run_powa.py"
+    command: "python3 powa-web-dev/run_powa.py"
     ports:
       - 8888:8888
     volumes:
