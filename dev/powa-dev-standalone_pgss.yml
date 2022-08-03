@@ -17,7 +17,7 @@ services:
   powa-web-dev:
     image: powateam/powa-web-dev
     container_name: powa-dev-web
-    command: "powa-web-dev/run_powa.py"
+    command: "python3 powa-web-dev/run_powa.py"
     ports:
       - 8888:8888
     volumes:
