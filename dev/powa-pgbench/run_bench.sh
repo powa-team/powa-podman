@@ -81,6 +81,12 @@ if [[ "$nb" == "0" ]]; then
 fi
 
 while [[ true ]]; do
+    # Set work_mem globally to a sensible random value, to generate some
+    # activity for pg_track_settings
+    w_m=$((5000 + $RANDOM % 5000))
+    psql -c "ALTER SYSTEM SET work_mem = $w_m" postgres
+    psql -c "SELECT pg_reload_conf()" postgres
+
     echo "running pgbench -T ${BENCH_TIME:-60} ${BENCH_FLAG}"
     pgbench -d ${dbname} -T ${BENCH_TIME:-60} ${BENCH_FLAG} >/dev/null 2>&1
     if [[ $? -ne 0 ]]; then
