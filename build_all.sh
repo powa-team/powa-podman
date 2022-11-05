@@ -192,7 +192,7 @@ function build_image {
         fqimg="${ORG}/${img_name}"
         if [[ "${img_version}" != "latest" ]]; then
             echo "Pushing ${fqimg}:${img_version}..."
-            podman push "${fqimg}:${img_version}" ${OCI_ARCHIVE}/${fqimg}:$[img_version]
+            podman push "${fqimg}:${img_version}" ${OCI_ARCHIVE}/${fqimg}:${img_version}
         fi
         echo "Pushing ${fqimg}:latest..."
         podman push "${fqimg}:latest" ${OCI_ARCHIVE}/${fqimg}:latest
