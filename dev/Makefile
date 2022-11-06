@@ -10,5 +10,6 @@ push: all
 	podman push powateam/powa-pyutils:latest docker://docker.io/powateam/powa-pyutils:latest
 	podman push powateam/powa-pgbin:latest docker://docker.io/powateam/powa-pgbin:latest
 	podman push powateam/powa-pgbench:latest docker://docker.io/powateam/powa-pgbench:latest
+	podman push powateam/powa-demoworkload:latest docker://docker.io/powateam/powa-demoworkload:latest
 	podman push powateam/powa-web-dev:latest docker://docker.io/powateam/powa-web-dev:latest
 	podman push powateam/powa-collector-dev:latest docker://docker.io/powateam/powa-collector-dev:latest
