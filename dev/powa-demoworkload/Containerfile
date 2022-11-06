@@ -1,0 +1,12 @@
+# vim:set ft=dockerfile:
+FROM powateam/powa-pgbin
+MAINTAINER Julien Rouhaud <rjuju123@gmail.com>
+
+RUN apt-get update && apt-get install -y \
+    git \
+    && rm -rf /var/lib/apt/lists/* \
+    && git clone https://github.com/powa-team/powa_demo.git /usr/local/src/powa_demo/
+
+COPY run_bench.sh /usr/local/src/
+
+CMD ["/usr/local/src/run_bench.sh"]
