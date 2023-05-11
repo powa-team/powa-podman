@@ -1,5 +1,5 @@
 BUILD_CMD = ./build_all.sh
-ifneq ($(filter-out undefined, CONTAINER_PUSH, PODMAN_PUSH, DOCKER_PUSH),)
+ifneq ($(filter-out undefined, ${CONTAINER_PUSH} ${PODMAN_PUSH} ${DOCKER_PUSH}),)
 BUILD_CMD += -p
 endif
 
