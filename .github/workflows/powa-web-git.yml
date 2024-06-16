@@ -1,21 +1,21 @@
-name: Publish powa-archivist-git container images
+name: Publish powa-web-git container images
 
 # Runs on a new commit on the master branch or when receivind a repository
-# dispatch event by the name of "powa-archivist-git".
+# dispatch event by the name of "powa-web-git".
 on:
   push:
     branches: [master]
   repository_dispatch:
-    types: [powa-archivist-git]
+    types: [powa-web-git]
 
 env:
   ORG: "powateam"
-  IMAGE_NAME: "powa-archivist-git"
+  IMAGE_NAME: "powa-web-git"
   REGISTRY: "index.docker.io"
 
 jobs:
   build_and_push:
-    name: Build powa-archivist-git container images and push to Docker hub
+    name: Build powa-web-git container images and push to Docker hub
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -42,8 +42,8 @@ jobs:
         id: push
         uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25
         with:
-          context: ./powa-archivist-git
-          file: ./powa-archivist-git/Containerfile
+          context: ./powa-web-git
+          file: ./powa-web-git/Containerfile
           push: true
           tags: ${{ env.ORG }}/${{ env.IMAGE_NAME}}:latest
           labels: ${{ steps.meta.outputs.labels }}
@@ -54,3 +54,4 @@ jobs:
           subject-name: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.IMAGE_NAME}}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
+
