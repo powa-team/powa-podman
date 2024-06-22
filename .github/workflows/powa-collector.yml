@@ -1,0 +1,41 @@
+name: Publish powa-collector container images
+
+on:
+  push:
+    branches: [master]
+  repository_dispatch:
+    types: [powa-collector]
+
+env:
+  ORG: "powateam"
+  REGISTRY: "index.docker.io"
+
+jobs:
+  build_and_push:
+    name: Build powa-collector container images and push to Docker hub
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+      attestations: write
+      id-token: write
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build all images
+        run: |
+          # We rely on the makefile and underlying scripts to build the images,
+          # as they have all the knowledge about the supported pg major
+          # versions and automatic detection of the latest releases of each
+          # component.
+          # Note that it primarily rely on podman, so alias it to docker.
+          alias podman=docker
+
+          CONTAINER_PUSH=1 CONTAINER_PUSH_YES=1 make powa-collector
