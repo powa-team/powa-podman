@@ -16,6 +16,7 @@ function usage {
     echo "                      image. Requires usage of -i option, and only"
     echo "                      supported for powa-archivist."
     echo " -v                   Verbose mode"
+    echo " -y                   Assume yes"
 }
 
 DIRNAME="$(dirname $0)"
@@ -25,8 +26,9 @@ specific_subver=
 noclean="false"
 do_push="false"
 quiet_flag="-q"
+assume_yes="false"
 
-while getopts "hi:nps:v" name; do
+while getopts "hi:nps:vy" name; do
     case "${name}" in
         h)
             usage
@@ -61,6 +63,9 @@ while getopts "hi:nps:v" name; do
             ;;
         v)
             quiet_flag=""
+            ;;
+        y)
+            assume_yes="true"
             ;;
         *)
             usage
@@ -230,12 +235,15 @@ if [[ "${do_push}" == "true" ]]; then
 fi
 echo "==================================="
 echo ""
-echo "Build images ? [y/N]"
-read cont
 
-if [ "$cont" != "y" -a "$cont" != "Y" ]; then
-    echo "Stopping now"
-    exit 1
+if [[ "${assume_yes}" != "true" ]]; then
+    echo "Build images ? [y/N]"
+    read cont
+
+    if [ "$cont" != "y" -a "$cont" != "Y" ]; then
+        echo "Stopping now"
+        exit 1
+    fi
 fi
 
 if should_be_built "powa-archivist"; then

@@ -1,6 +1,11 @@
 BUILD_CMD = ./build_all.sh
+
 ifneq ($(filter-out undefined, ${CONTAINER_PUSH} ${PODMAN_PUSH} ${DOCKER_PUSH}),)
 BUILD_CMD += -p
+endif
+
+ifneq ($(filter-out undefined, ${CONTAINER_PUSH_YES}),)
+BUILD_CMD += -y
 endif
 
 .PHONY: git git-misc powa-archivist powa-archivist-git powa-web-git powa-collector-git
