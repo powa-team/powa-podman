@@ -26,7 +26,7 @@ noclean="false"
 do_push="false"
 quiet_flag="-q"
 
-while getopts "hi:nps:u:v" name; do
+while getopts "hi:nps:v" name; do
     case "${name}" in
         h)
             usage
