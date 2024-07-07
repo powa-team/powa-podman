@@ -3,6 +3,7 @@ name: Publish powa-collector container images
 on:
   push:
     branches: [master]
+  workflow_dispatch:
   repository_dispatch:
     types: [powa-collector]
 
