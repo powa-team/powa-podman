@@ -68,6 +68,6 @@ The other compose files correspond to other kind of setup, for instance:
 - `powa-dev-standalone.yml` will create a standalone environment rather than
   using the remote mode added in Powa 4
 - `powa-dev_pgss.yml` and `powa-dev-standby_pgss.yml` will create the same
-  environment as respectively powa-dev.yml and powa-dev-standby.yml  but
+  environment as respectively `powa-dev.yml` and `powa-dev-standby.yml` but
   won't register any additional extension, so only *pg_stat_statements* (and
   *powa-archivist*) will be used
