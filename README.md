@@ -40,10 +40,10 @@ also mainly thought as template that can be adapted depending on your needs.
 
 If you're not familiar with podman-compose, you can quickly launch the wanted
 setup from any directory using the `-f` option of podman-compsoe.  For
-instance, if you cloned this repository in `~/powa-doocker` and want to run the
+instance, if you cloned this repository in `~/powa-docker` and want to run the
 images for a remote mode, simply run:
 
-podman-compose -f ~/powa-podman/composoe/powa_remote_mode.yml up
+podman-compose -f ~/powa-podman/compose/powa_remote_mode.yml up
 
 Please refer to https://github.com/containers/podman-compose for more details
 on how to use podman-compose.
