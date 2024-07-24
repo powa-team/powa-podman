@@ -56,4 +56,5 @@ services:
       POSTGRES_HOST_AUTH_METHOD: 'trust'
       POWA_ROLE: 'STANDBY'
       POWA_PRIMARY: 'remote-primary'
+      POWA_PRIMARY_PORT: 5433
       POWA_LOCAL_SNAPSHOT: 'NO'
