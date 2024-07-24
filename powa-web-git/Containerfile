@@ -8,12 +8,15 @@ RUN apt-get update && apt-get install -y \
     libpq5 \
     libpq-dev \
     git \
+    npm \
     && git clone https://github.com/powa-team/powa-web.git powa-web.git \
     && pip3 install psycopg2-binary sqlalchemy tornado \
-    && apt-get purge -y --auto-remove libpq-dev git \
+    && cd powa-web.git && npm ci && npm run build \
+    && rm -rf node_modules ~/.npm \
+    && apt-get purge -y --auto-remove libpq-dev git npm \
     && rm -rf /var/lib/apt/lists/*
 
 COPY powa-web.conf /etc/
 
 EXPOSE 8888
-CMD ["python3", "powa-web.git/run_powa.py"]
+CMD ["python3", "powa-web.git/powa-web"]
