@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     git \
     npm \
-    && git clone https://github.com/powa-team/powa-web.git powa-web.git \
+    && git clone https://github.com/powa-team/powa-web.git powa-web.git --depth=1 \
     && pip3 install psycopg2-binary sqlalchemy tornado \
     && cd powa-web.git && npm ci && npm run build \
     && rm -rf node_modules ~/.npm \
