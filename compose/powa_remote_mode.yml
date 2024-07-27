@@ -1,4 +1,4 @@
-version: "2"
+version: "3"
 
 services:
   powa-repository:
@@ -19,25 +19,26 @@ services:
           port => 5434,
           frequency => 15,
           extensions => '{pg_stat_kcache,pg_qualstats,pg_wait_sampling,pg_track_settings}');
+    healthcheck:
+      test: ["CMD-SHELL", "psql -U postgres -AXtc 'SELECT count(*) FROM powa_servers' powa | grep 3"]
 
   powa-collector:
     image: powateam/powa-collector-git
     container_name: powa-git-collector
     restart: on-failure
-    links:
-      - powa-repository
-      - remote-primary
-      - remote-standby
+    depends_on:
+      powa-repository:
+        condition: service_healthy
+      remote-primary:
+        condition: service_healthy
+      remote-standby:
+        condition: service_healthy
 
   powa-web-git:
     image: powateam/powa-web-git
     container_name: powa-git-web
     ports:
       - 8888:8888
-    links:
-      - powa-repository
-      - remote-primary
-      - remote-standby
 
   remote-primary:
     image: powateam/powa-archivist-git
@@ -47,6 +48,8 @@ services:
       POSTGRES_HOST_AUTH_METHOD: 'trust'
       POWA_ROLE: 'PRIMARY'
       POWA_LOCAL_SNAPSHOT: 'NO'
+    healthcheck:
+      test: ["CMD-SHELL", "psql -U postgres -AXtc 'SELECT count(*) FROM powa_servers' powa"]
 
   remote-standby:
     image: powateam/powa-archivist-git
@@ -58,3 +61,9 @@ services:
       POWA_PRIMARY: 'remote-primary'
       POWA_PRIMARY_PORT: '5433'
       POWA_LOCAL_SNAPSHOT: 'NO'
+    restart: on-failure
+    depends_on:
+      remote-primary:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "psql -U postgres -AXtc 'SELECT count(*) FROM powa_servers' powa"]
