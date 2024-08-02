@@ -1,4 +1,4 @@
-version: "2"
+version: "3"
 
 services:
   powa-repository:
@@ -19,6 +19,8 @@ services:
           port => 5434,
           frequency => 15,
           extensions => '{pg_stat_kcache,pg_qualstats,pg_wait_sampling,pg_track_settings}');
+    healthcheck:
+      test: ["CMD-SHELL", "psql -U postgres -AXtc 'SELECT count(*) FROM powa_servers' powa | grep 3"]
 
   powa-collector:
     image: powateam/powa-collector-dev
@@ -27,10 +29,13 @@ services:
     command: "python3 powa-collector-dev/powa-collector.py"
     volumes:
       - '${POWA_COLLECTOR_GIT}:/usr/local/src/powa-collector-dev'
-    links:
-      - powa-repository
-      - remote-primary
-      - remote-standby
+    depends_on:
+      powa-repository:
+        condition: service_healthy
+      remote-primary:
+        condition: service_healthy
+      remote-standby:
+        condition: service_healthy
 
   powa-web-dev:
     image: powateam/powa-web-dev
@@ -40,10 +45,9 @@ services:
       - 8888:8888
     volumes:
       - '${POWA_WEB_GIT}:/usr/local/src/powa-web-dev'
-    links:
-      - powa-repository
-      - remote-primary
-      - remote-standby
+    depends_on:
+      powa-repository:
+        condition: service_healthy
 
   remote-primary:
     image: powateam/powa-archivist-git
@@ -53,6 +57,8 @@ services:
       POSTGRES_HOST_AUTH_METHOD: 'trust'
       POWA_ROLE: 'PRIMARY'
       POWA_LOCAL_SNAPSHOT: 'NO'
+    healthcheck:
+      test: ["CMD-SHELL", "psql -U postgres -AXtc 'SELECT count(*) FROM powa_servers' powa"]
 
   remote-standby:
     image: powateam/powa-archivist-git
@@ -62,8 +68,13 @@ services:
       POSTGRES_HOST_AUTH_METHOD: 'trust'
       POWA_ROLE: 'STANDBY'
       POWA_PRIMARY: 'remote-primary'
-      POWA_PRIMARY_PORT: 5433
+      POWA_PRIMARY_PORT: '5433'
       POWA_LOCAL_SNAPSHOT: 'NO'
+    depends_on:
+      remote-primary:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "psql -U postgres -AXtc 'SELECT count(*) FROM powa_servers' powa"]
 
   pgbench-std-primary:
     image: powateam/powa-pgbench
@@ -76,6 +87,9 @@ services:
       BENCH_SCALE_FACTOR: 10
       BENCH_TIME: 60
       BENCH_FLAG: '-c1 -j1 -n -R 10'
+    depends_on:
+      remote-primary:
+        condition: service_healthy
 
   pgbench-std-standby:
     image: powateam/powa-pgbench
@@ -89,6 +103,9 @@ services:
       BENCH_SCALE_FACTOR: 10
       BENCH_TIME: 120
       BENCH_FLAG: '-c2 -j2 -S -n -R 10'
+    depends_on:
+      remote-standby:
+        condition: service_healthy
 
   pgdemoworload-std-primary:
     image: powateam/powa-demoworkload
@@ -98,3 +115,6 @@ services:
       PGHOST: 'remote-primary'
       PGUSER: 'postgres'
       PGPORT: 5433
+    depends_on:
+      remote-primary:
+        condition: service_healthy
