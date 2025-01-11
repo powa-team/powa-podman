@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
     postgresql-contrib-14 \
     postgresql-server-dev-14 \
     wget \
-    && wget -O- https://github.com/powa-team/powa-archivist/archive/REL_5_0_0.tar.gz | tar -xzf - \
+    && wget -O- https://github.com/powa-team/powa-archivist/archive/REL_5_0_1.tar.gz | tar -xzf - \
     && wget -O- https://github.com/powa-team/pg_qualstats/archive/2.1.1.tar.gz | tar -xzf - \
     && wget -O- https://github.com/powa-team/pg_stat_kcache/archive/REL2_3_0.tar.gz | tar -xzf - \
     && wget -O- https://github.com/hypopg/hypopg/archive/1.4.1.tar.gz | tar -xzf - \
