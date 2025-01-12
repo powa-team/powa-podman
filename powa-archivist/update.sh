@@ -34,7 +34,7 @@ echo "hypopg: ${HYPOPG_VERSION}"
 echo "pg_track_settings: ${PGTS_VERSION}"
 echo "pg_wait_sampling: ${PGWS_VERSION}"
 
-for pg_version in $(ls "${cur_dir}"| egrep '[0-9]+(\.[0-9]+)?'); do
+for pg_version in $(ls "${cur_dir}"| grep -E '[0-9]+(\.[0-9]+)?'); do
     echo "Setting up powa-archivist-${pg_version}..."
     echo ""
 

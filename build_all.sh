@@ -183,7 +183,7 @@ function build_image {
     fi
 
     # Update base image
-    base_image=$(egrep "^FROM " "${img_dir}/Containerfile" | sed 's/FROM //')
+    base_image=$(grep -E "^FROM " "${img_dir}/Containerfile" | sed 's/FROM //')
     echo "Pulling ${base_image}..."
     podman pull "${base_image}"
 
@@ -259,7 +259,7 @@ if should_be_built "powa-archivist"; then
     fi
 
     BASEDIR="$DIRNAME/powa-archivist"
-    for version in $(ls "$BASEDIR" | egrep '[0-9](+\.[0-9]+)?'); do
+    for version in $(ls "$BASEDIR" | grep -E '^[0-9]+(\.[0-9]+)?$'); do
         # filter subversion if asked
         if [[ -n "${specific_subver}" && "${specific_subver}" != "${version}" ]]; then
             continue
