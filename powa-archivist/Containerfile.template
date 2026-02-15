@@ -1,5 +1,5 @@
 #vim: set ft=dockerfile
-FROM postgres:%%PG_VER%%-bullseye
+FROM postgres:%%PG_VER%%-%%DEBIAN_VER%%
 MAINTAINER Julien Rouhaud <rjuju123@gmail.com>
 
 WORKDIR /usr/local/src

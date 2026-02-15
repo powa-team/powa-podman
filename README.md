@@ -63,12 +63,13 @@ details.
 Adding support for a new PostgreSQL major version
 -------------------------------------------------
 
-To generate the new powa-archivist files for a new version, simply create the
-required "powa-archivist/XY" directory and run "make" in this repository root
-directory.  The new files for the version XY will automatically be generated.
+To generate new powa-arachivit files for a new major version:
 
-Once done, those additional file should get updated too to reference the new
-PostgreSQL major version:
+1. Add the required "powa-archivist/XY" directory (where XY is the new PostgreSQL major version).
+2. Update the `powa-archivist/debian_versions.conf` file to map the PostgreSQL version to the correct Debian release (e.g., `18=bookworm`).
+3. Run `make` in the powa-archivist directory. The new files for the version XY will be generated.
+
+Once done, update the following files for reference the new PostgreSQL major version as needed:
 
 - compose/powa_standalone_mode.yml
 - powa-archivist-git/Containerfile
