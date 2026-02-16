@@ -34,15 +34,17 @@ echo "hypopg: ${HYPOPG_VERSION}"
 echo "pg_track_settings: ${PGTS_VERSION}"
 echo "pg_wait_sampling: ${PGWS_VERSION}"
 
-# Read debian_versions.conf into an array
-declare -A DEBIAN_VERSIONS_MAP
-while IFS='=' read -r pg_version debian_version; do
-    DEBIAN_VERSIONS_MAP["$pg_version"]="$debian_version"
-done < "${cur_dir}/debian_versions.conf"
+# Source debian_versions.sh to declare the versions array
+source "${cur_dir}/debian_versions.sh"
 
 get_debian_version() {
     local pg_version="$1"
-    echo "${DEBIAN_VERSIONS_MAP[$pg_version]:-bullseye}" # fallback fails if base image is not published with the release
+    if [[ -n "${DEBIAN_VERSIONS_MAP[$pg_version]}" ]]; then
+        echo "${DEBIAN_VERSIONS_MAP[$pg_version]}"
+    else
+        echo "Error: No Debian version found for PostgreSQL $pg_version. Update debian_versions.sh with the mapping." >&2
+        exit 1
+    fi
 }
 
 for pg_version in $(ls "${cur_dir}"| grep -E '[0-9]+(\.[0-9]+)?'); do
@@ -57,14 +59,15 @@ for pg_version in $(ls "${cur_dir}"| grep -E '[0-9]+(\.[0-9]+)?'); do
     rm -f "${full_path}/*"
 
     # create new Containerfile
-    sed "s/%%PG_VER%%/${pg_version}/g" "$template" | sed "s/%%DEBIAN_VER%%/${debian_version}/g" > "${containerfile}"
+    sed "s/%%PG_VER%%/${pg_version}/g" "$template" > "${containerfile}"
+    sed -i '' "s/%%DEBIAN_VER%%/${debian_version}/g" "${containerfile}"
     # Set the download URL
-    sed -i "s/%%POWA_VER%%/${POWA_VERSION}/g" "${containerfile}"
-    sed -i "s/%%PGQS_VER%%/${PGQS_VERSION}/g" "${containerfile}"
-    sed -i "s/%%PGSK_VER%%/${PGSK_VERSION}/g" "${containerfile}"
-    sed -i "s/%%HYPOPG_VER%%/${HYPOPG_VERSION}/g" "${containerfile}"
-    sed -i "s/%%PGTS_VER%%/${PGTS_VERSION}/g" "${containerfile}"
-    sed -i "s/%%PGWS_VER%%/${PGWS_VERSION}/g" "${containerfile}"
+    sed -i '' "s/%%POWA_VER%%/${POWA_VERSION}/g" "${containerfile}"
+    sed -i '' "s/%%PGQS_VER%%/${PGQS_VERSION}/g" "${containerfile}"
+    sed -i '' "s/%%PGSK_VER%%/${PGSK_VERSION}/g" "${containerfile}"
+    sed -i '' "s/%%HYPOPG_VER%%/${HYPOPG_VERSION}/g" "${containerfile}"
+    sed -i '' "s/%%PGTS_VER%%/${PGTS_VERSION}/g" "${containerfile}"
+    sed -i '' "s/%%PGWS_VER%%/${PGWS_VERSION}/g" "${containerfile}"
 
     # add the needed resources
     cp "${cur_dir}/${sh}" "${full_path}/${sh}"

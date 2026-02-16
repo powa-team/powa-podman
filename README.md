@@ -65,8 +65,9 @@ Adding support for a new PostgreSQL major version
 
 To generate new powa-arachivit files for a new major version:
 
-1. Add the required "powa-archivist/XY" directory (where XY is the new PostgreSQL major version).
-2. Update the `powa-archivist/debian_versions.conf` file to map the PostgreSQL version to the correct Debian release (e.g., `18=bookworm`).
+1. Create the required "powa-archivist/XY" directory (where XY is the new PostgreSQL major version).
+2. Update the `powa-archivist/debian_versions.sh` file to map the PostgreSQL version to the latest stable Debian release available at the time.
+   1. If unsure which latest Debian release is used as the base for the PostgreSQL image, check the Docker Hub page for PostgreSQL at https://hub.docker.com/_/postgres. The PostgreSQL team names each image tag with the Debian version used.
 3. Run `make` in the powa-archivist directory. The new files for the version XY will be generated.
 
 Once done, update the following files for reference the new PostgreSQL major version as needed:
