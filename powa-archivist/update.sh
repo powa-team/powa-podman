@@ -60,14 +60,14 @@ for pg_version in $(ls "${cur_dir}"| grep -E '[0-9]+(\.[0-9]+)?'); do
 
     # create new Containerfile
     sed "s/%%PG_VER%%/${pg_version}/g" "$template" > "${containerfile}"
-    sed -i '' "s/%%DEBIAN_VER%%/${debian_version}/g" "${containerfile}"
+    sed -i "s/%%DEBIAN_VER%%/${debian_version}/g" "${containerfile}"
     # Set the download URL
-    sed -i '' "s/%%POWA_VER%%/${POWA_VERSION}/g" "${containerfile}"
-    sed -i '' "s/%%PGQS_VER%%/${PGQS_VERSION}/g" "${containerfile}"
-    sed -i '' "s/%%PGSK_VER%%/${PGSK_VERSION}/g" "${containerfile}"
-    sed -i '' "s/%%HYPOPG_VER%%/${HYPOPG_VERSION}/g" "${containerfile}"
-    sed -i '' "s/%%PGTS_VER%%/${PGTS_VERSION}/g" "${containerfile}"
-    sed -i '' "s/%%PGWS_VER%%/${PGWS_VERSION}/g" "${containerfile}"
+    sed -i "s/%%POWA_VER%%/${POWA_VERSION}/g" "${containerfile}"
+    sed -i "s/%%PGQS_VER%%/${PGQS_VERSION}/g" "${containerfile}"
+    sed -i "s/%%PGSK_VER%%/${PGSK_VERSION}/g" "${containerfile}"
+    sed -i "s/%%HYPOPG_VER%%/${HYPOPG_VERSION}/g" "${containerfile}"
+    sed -i "s/%%PGTS_VER%%/${PGTS_VERSION}/g" "${containerfile}"
+    sed -i "s/%%PGWS_VER%%/${PGWS_VERSION}/g" "${containerfile}"
 
     # add the needed resources
     cp "${cur_dir}/${sh}" "${full_path}/${sh}"
