@@ -34,18 +34,33 @@ echo "hypopg: ${HYPOPG_VERSION}"
 echo "pg_track_settings: ${PGTS_VERSION}"
 echo "pg_wait_sampling: ${PGWS_VERSION}"
 
+# Source debian_versions.sh to declare the versions array
+source "${cur_dir}/debian_versions.sh"
+
+get_debian_version() {
+    local pg_version="$1"
+    if [[ -n "${DEBIAN_VERSIONS_MAP[$pg_version]}" ]]; then
+        echo "${DEBIAN_VERSIONS_MAP[$pg_version]}"
+    else
+        echo "Error: No Debian version found for PostgreSQL $pg_version. Update debian_versions.sh with the mapping." >&2
+        exit 1
+    fi
+}
+
 for pg_version in $(ls "${cur_dir}"| grep -E '[0-9]+(\.[0-9]+)?'); do
     echo "Setting up powa-archivist-${pg_version}..."
     echo ""
 
     full_path="${cur_dir}/${pg_version}"
     containerfile="${full_path}/Containerfile"
+    debian_version=$(get_debian_version "$pg_version")
 
     # clean everything in the X.Y directory
     rm -f "${full_path}/*"
 
     # create new Containerfile
     sed "s/%%PG_VER%%/${pg_version}/g" "$template" > "${containerfile}"
+    sed -i "s/%%DEBIAN_VER%%/${debian_version}/g" "${containerfile}"
     # Set the download URL
     sed -i "s/%%POWA_VER%%/${POWA_VERSION}/g" "${containerfile}"
     sed -i "s/%%PGQS_VER%%/${PGQS_VERSION}/g" "${containerfile}"
