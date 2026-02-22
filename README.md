@@ -26,8 +26,8 @@ Testing PoWA with podman-compose
 
 Two compose images are provided with this repository:
 
-- powa_standalone_mode.yml
-- powa_remote_mode.yml
+- `powa_standalone_mode.yml`
+- `powa_remote_mode.yml`
 
 The first will setup a environment with a single PostgreSQL server storing both
 the metrics (using the dedicated bgworker) and any custom data that suits your
@@ -43,34 +43,44 @@ setup from any directory using the `-f` option of podman-compsoe.  For
 instance, if you cloned this repository in `~/powa-docker` and want to run the
 images for a remote mode, simply run:
 
+```sh
 podman-compose -f ~/powa-podman/compose/powa_remote_mode.yml up
+```
 
-Please refer to https://github.com/containers/podman-compose for more details
-on how to use podman-compose.
+Please refer to [podman-compose](https://github.com/containers/podman-compose)
+for more details on how to use `podman-compose`.
 
 The initialization might take a minute or so depending on your machine.  Once
-done, the powa-web UI will be available at http://127.0.0.1:8888.
+done, the powa-web UI will be available at
+[http://127.0.0.1:8888](http://127.0.0.1:8888).
 
 Note that only the powa-web UI port is exposed to your local machine, as most
 people using those files are likely to also run their application in
 containers.  If that's not your case and want to directly connect to the
 PostgreSQL server from your host, you can easily do that by adding a `ports`
-section for the wanted instance(s).  You can refer to the official
-compose file specification at
-https://github.com/compose-spec/compose-spec/blob/master/spec.md#ports for more
-details.
+section for the wanted instance(s).  You can refer to [the official compose
+file
+specification](https://github.com/compose-spec/compose-spec/blob/master/spec.md#ports)
+for more details.
 
 Adding support for a new PostgreSQL major version
 -------------------------------------------------
 
 To generate new powa-arachivit files for a new major version:
 
-1. Create the required "powa-archivist/XY" directory (where XY is the new PostgreSQL major version).
-2. Update the `powa-archivist/debian_versions.sh` file to map the PostgreSQL version to the latest stable Debian release available at the time.
-   1. If unsure which latest Debian release is used as the base for the PostgreSQL image, check the Docker Hub page for PostgreSQL at https://hub.docker.com/_/postgres. The PostgreSQL team names each image tag with the Debian version used.
-3. Run `make` in the powa-archivist directory. The new files for the version XY will be generated.
+1. Create the required "**powa-archivist/XY**" directory (where XY is the new
+   PostgreSQL major version).
+2. Update the `powa-archivist/debian_versions.sh` file to map the PostgreSQL
+   version to the latest stable Debian release available at the time.
+   1. If unsure which latest Debian release is used as the base for the
+      PostgreSQL image, check the [Docker Hub page for
+      PostgreSQL](https://hub.docker.com/_/postgres). The PostgreSQL team names
+      each image tag with the Debian version used.
+3. Run `make` in the **powa-archivist** directory. The new files for the
+   version **XY** will be generated.
 
-Once done, update the following files for reference the new PostgreSQL major version as needed:
+Once done, update the following files for reference the new PostgreSQL major
+version as needed:
 
-- compose/powa_standalone_mode.yml
-- powa-archivist-git/Containerfile
+- `compose/powa_standalone_mode.yml`
+- `powa-archivist-git/Containerfile`
