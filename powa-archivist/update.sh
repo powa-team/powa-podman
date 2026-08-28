@@ -8,6 +8,29 @@ sh="setup_powa-archivist.sh"
 sql="install_all_powa_ext.sql"
 API_URL="https://api.github.com"
 
+if [[ -n "${GITHUB_USERNAME}" && -n "${GITHUB_TOKEN}" ]]; then
+    API_AUTH="--user ${GITHUB_USERNAME}:${GITHUB_TOKEN}"
+fi
+
+function get_version {
+    _repo="$1"
+
+    if [[ "${_repo}" == "" ]]; then
+        >&2 echo "No repo passed"
+        exit 1
+    fi
+
+    _url="${API_URL}/repos/${_repo}/releases/latest"
+
+    _version=$(curl -L ${API_AUTH} ${_url}|jq -r '.tag_name')
+    if [[ "${_version}" == "null" ]]; then
+        >&2 echo "Error fetching version for ${_repo}"
+        exit 1
+    fi
+
+    echo "${_version}"
+}
+
 echo "###########################"
 echo "#                         #"
 echo "# Updating Containerfiles #"
@@ -16,16 +39,12 @@ echo "#                         #"
 echo "###########################"
 
 echo "Retrieving extension versions..."
-
-if [[ -n "${GITHUB_USERNAME}" && -n "${GITHUB_TOKEN}" ]]; then
-    API_AUTH="--user ${GITHUB_USERNAME}:${GITHUB_TOKEN}"
-fi
-POWA_VERSION=$(curl -L ${API_AUTH} ${API_URL}/repos/powa-team/powa-archivist/releases/latest|jq -r '.tag_name')
-PGQS_VERSION=$(curl -L ${API_AUTH} ${API_URL}/repos/powa-team/pg_qualstats/releases/latest|jq -r '.tag_name')
-PGSK_VERSION=$(curl -L ${API_AUTH} ${API_URL}/repos/powa-team/pg_stat_kcache/releases/latest|jq -r '.tag_name')
-HYPOPG_VERSION=$(curl -L ${API_AUTH} ${API_URL}/repos/hypopg/hypopg/releases/latest|jq -r '.tag_name')
-PGTS_VERSION=$(curl -L ${API_AUTH} ${API_URL}/repos/rjuju/pg_track_settings/releases/latest|jq -r '.tag_name')
-PGWS_VERSION=$(curl -L ${API_AUTH} ${API_URL}/repos/postgrespro/pg_wait_sampling/releases/latest|jq -r '.tag_name')
+POWA_VERSION=$(get_version "powa-team/powa-archivist")
+PGQS_VERSION=$(get_version "powa-team/pg_qualstats")
+PGSK_VERSION=$(get_version "powa-team/pg_stat_kcache")
+HYPOPG_VERSION=$(get_version "hypopg/hypopg")
+PGTS_VERSION=$(get_version "rjuju/pg_track_settings")
+PGWS_VERSION=$(get_version "postgrespro/pg_wait_sampling")
 
 echo "powa-archivist: ${POWA_VERSION}"
 echo "pg_qualstats: ${PGQS_VERSION}"
